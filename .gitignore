@@ -1,0 +1,17 @@
+__pycache__/
+*.py[cod]
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+.eggs/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.env
+.venv/
+venv/
+
+# Instance JSON files live on Hugging Face — do not commit them to GitHub
+instances/

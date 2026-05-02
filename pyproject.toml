@@ -1,0 +1,38 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ttplib"
+version = "0.1.0"
+description = "Travelling Thief Problem benchmark instance library — 10 200 instances, no local storage required."
+readme = "README.md"
+license = { text = "MIT" }
+requires-python = ">=3.8"
+authors = [
+    { name = "Mahdi Khemakhem", email = "mahdi.khemakhem@enetcom.usf.tn" },
+]
+keywords = ["TTP", "travelling thief problem", "combinatorial optimisation", "benchmark"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Topic :: Scientific/Engineering",
+    "Intended Audience :: Science/Research",
+]
+dependencies = [
+    "networkx>=3.0",
+    "numpy>=1.24",
+]
+
+[project.urls]
+Homepage = "https://github.com/makopt/ttplib"
+Repository = "https://github.com/makopt/ttplib"
+"Bug Tracker" = "https://github.com/makopt/ttplib/issues"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["ttplib*"]
+
+[tool.setuptools.package-data]
+ttplib = ["catalog.json"]
