@@ -1,6 +1,6 @@
 """ttplib — Travelling Thief Problem instance library.
 
-Load any of the 10,200 benchmark TTP instances directly from the network:
+Load any of the 9,720 benchmark TTP instances directly from the network:
 
     import ttplib
 

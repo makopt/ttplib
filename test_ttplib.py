@@ -59,7 +59,7 @@ def _load_minimal() -> ttplib.TTPInstance:
 
 class TestListInstances(unittest.TestCase):
     def test_total_count(self):
-        self.assertEqual(len(ttplib.list_instances()), 10200)
+        self.assertEqual(len(ttplib.list_instances()), 9720)
 
     def test_returns_list_of_strings(self):
         names = ttplib.list_instances()
@@ -109,7 +109,7 @@ class TestListInstances(unittest.TestCase):
 
 class TestListBases(unittest.TestCase):
     def test_count(self):
-        self.assertEqual(len(ttplib.list_bases()), 85)
+        self.assertEqual(len(ttplib.list_bases()), 81)
 
     def test_no_duplicates(self):
         bases = ttplib.list_bases()
@@ -117,8 +117,13 @@ class TestListBases(unittest.TestCase):
 
     def test_contains_known_bases(self):
         bases = ttplib.list_bases()
-        for name in ("berlin52", "kroA100", "toy-10"):
+        for name in ("berlin52", "kroA100", "a280"):
             self.assertIn(name, bases)
+
+    def test_toy_bases_absent(self):
+        bases = ttplib.list_bases()
+        for toy in ("toy-10", "toy-20", "toy-30", "toy-40"):
+            self.assertNotIn(toy, bases)
 
     def test_all_strings(self):
         self.assertTrue(all(isinstance(b, str) for b in ttplib.list_bases()))
