@@ -20,7 +20,7 @@ from ttplib.remote import _mem_cache
 SKIP_NETWORK = os.environ.get("TTPLIB_SKIP_NETWORK", "0") == "1"
 
 # Small instance (52 cities, 51 items) used across network tests.
-TEST_INSTANCE = "berlin52_n51_uncorr_01"
+TEST_INSTANCE = "berlin52_n51_uncorr_10"
 
 # Minimal hand-crafted 3-city instance for offline tests.
 _MINIMAL = {
