@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "ttplib"
-version = "0.1.0"
-description = "Travelling Thief Problem benchmark instance library — 10 200 instances, no local storage required."
+version = "0.2.0"
+description = "Travelling Thief Problem benchmark instance library: the 9,720 instances, with corrected versions of the four instances whose renting rate is 0.00, and no local storage required."
 readme = "README.md"
 license = { text = "MIT" }
 requires-python = ">=3.8"

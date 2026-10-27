@@ -21,6 +21,20 @@ BASE_URL = (
     f"https://huggingface.co/datasets/{_HF_USER}/{_HF_REPO}"
     f"/resolve/{_HF_BRANCH}/instances"
 )
+# Corrected versions of the instances whose renting rate is 0.00 in the original files; the folder layout is the same.
+CORRECTED_URL = (
+    f"https://huggingface.co/datasets/{_HF_USER}/{_HF_REPO}"
+    f"/resolve/{_HF_BRANCH}/corrected"
+)
+
+# Instances whose original file gives a renting rate of 0.00 (written with two decimals). Their corrected version has
+# the renting rate recomputed with the rule of Polyakovskiy et al. (2014); everything else is identical.
+CORRECTED = (
+    "dsj1000_n999_bounded-strongly-corr_01",
+    "dsj1000_n999_uncorr-similar-weights_01",
+    "dsj1000_n999_uncorr-similar-weights_02",
+    "dsj1000_n999_uncorr_01",
+)
 
 # In-memory session cache: name -> TTPInstance
 _mem_cache: Dict[str, TTPInstance] = {}
@@ -50,16 +64,23 @@ def _fetch_json(url: str) -> dict:
         return json.loads(resp.read().decode("utf-8"))
 
 
-def _disk_cache_path(name: str) -> Path:
+def _disk_cache_path(name: str, corrected: bool = False) -> Path:
     cache_dir = Path(
         os.environ.get("TTPLIB_CACHE_DIR", Path.home() / ".cache" / "ttplib" / "instances")
     )
+    if corrected:
+        cache_dir = cache_dir / "corrected"           # folders of the originals all end with "-ttp", so no clash
     folder = _folder_from_name(name)
     return cache_dir / folder / (name + ".json")
 
 
-def load(name: str, cache: bool = True) -> TTPInstance:
-    """Load a TTP instance by name, fetching from GitHub if needed.
+def is_corrected(name: str) -> bool:
+    """True if the instance has a corrected version (renting rate 0.00 in the original file)."""
+    return name in CORRECTED
+
+
+def load(name: str, cache: bool = True, corrected: bool = True) -> TTPInstance:
+    """Load a TTP instance by name, fetching it from Hugging Face if needed.
 
     Parameters
     ----------
@@ -69,26 +90,33 @@ def load(name: str, cache: bool = True) -> TTPInstance:
     cache:
         When True, cache downloaded files to ``~/.cache/ttplib/`` so
         subsequent calls skip the network request.
+    corrected:
+        When True (default), the four instances whose original file gives a
+        renting rate of 0.00 are loaded in their corrected version (see
+        ``ttplib.CORRECTED``). Use False to load the original 2014 files,
+        for example to compare with published results. All other instances
+        are the same in both cases.
 
     Returns
     -------
     TTPInstance
     """
-    if name in _mem_cache:
-        return _mem_cache[name]
+    use_corrected = corrected and name in CORRECTED
+    key = name + ("#corrected" if use_corrected else "")
+    if key in _mem_cache:
+        return _mem_cache[key]
 
     if cache:
-        disk_path = _disk_cache_path(name)
+        disk_path = _disk_cache_path(name, use_corrected)
         if disk_path.exists():
             with open(disk_path, "r") as f:
                 data = json.load(f)
             inst = TTPInstance.from_dict(data)
-            _mem_cache[name] = inst
+            _mem_cache[key] = inst
             return inst
 
-
     folder = _folder_from_name(name)
-    url = f"{BASE_URL}/{folder}/{name}.json"
+    url = f"{CORRECTED_URL if use_corrected else BASE_URL}/{folder}/{name}.json"
     try:
         data = _fetch_json(url)
     except Exception as exc:
@@ -99,13 +127,13 @@ def load(name: str, cache: bool = True) -> TTPInstance:
         ) from exc
 
     if cache:
-        disk_path = _disk_cache_path(name)
+        disk_path = _disk_cache_path(name, use_corrected)
         disk_path.parent.mkdir(parents=True, exist_ok=True)
         with open(disk_path, "w") as f:
             json.dump(data, f)
 
     inst = TTPInstance.from_dict(data)
-    _mem_cache[name] = inst
+    _mem_cache[key] = inst
     return inst
 
 

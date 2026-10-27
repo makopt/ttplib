@@ -400,6 +400,28 @@ class TestNetworkCaching(unittest.TestCase):
         self.assertEqual(inst.name, "berlin52-TTP")
 
 
+class TestCorrectedInstances(unittest.TestCase):
+    """The four instances whose original file gives a renting rate of 0.00 (version 0.2.0)."""
+
+    def test_corrected_list(self):
+        self.assertEqual(len(ttplib.CORRECTED), 4)
+        for name in ttplib.CORRECTED:
+            self.assertIn(name, ttplib.list_instances())
+            self.assertTrue(ttplib.is_corrected(name))
+        self.assertFalse(ttplib.is_corrected(TEST_INSTANCE))
+
+    def test_corrected_and_original_rents(self):
+        if SKIP_NETWORK:
+            self.skipTest("Network tests skipped (TTPLIB_SKIP_NETWORK=1)")
+        name = "dsj1000_n999_uncorr_01"
+        corrected = ttplib.load(name, cache=False)
+        original = ttplib.load(name, cache=False, corrected=False)
+        self.assertGreater(corrected.renting_ratio, 0.0)
+        self.assertLess(corrected.renting_ratio, 0.005)
+        self.assertEqual(original.renting_ratio, 0.0)
+        self.assertEqual(corrected.capacity, original.capacity)
+
+
 class TestNetworkErrors(unittest.TestCase):
     @classmethod
     def setUpClass(cls):

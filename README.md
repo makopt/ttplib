@@ -198,6 +198,36 @@ Each base problem has instances for 4 item-count multipliers, 3 correlation type
 
 ---
 
+## Corrected instances (version 0.2.0)
+
+In the original files, the renting rate is written with two decimals. For four instances built on dsj1000 with 999
+items, this gives a renting rate of 0.00, so travel time costs nothing and the instance is a pure knapsack problem:
+
+| Instance | Renting rate in the original file | Corrected renting rate |
+|---|---|---|
+| `dsj1000_n999_bounded-strongly-corr_01` | 0.00 | 0.0028417669143102806 |
+| `dsj1000_n999_uncorr-similar-weights_01` | 0.00 | 0.00187512008103438 |
+| `dsj1000_n999_uncorr-similar-weights_02` | 0.00 | 0.0036829751838066 |
+| `dsj1000_n999_uncorr_01` | 0.00 | 0.0034836798642203476 |
+
+The corrected rate is computed with the rule of the original generator (optimal knapsack profit divided by the travel
+time of a reference solution) and is exact for the published reference solution. Only the renting rate differs from
+the original file. `ttplib.load` serves the corrected version by default:
+
+```python
+import ttplib
+
+ttplib.load("dsj1000_n999_uncorr_01").renting_ratio                   # 0.0034836798642203476
+ttplib.load("dsj1000_n999_uncorr_01", corrected=False).renting_ratio  # 0.0, the original 2014 file
+ttplib.CORRECTED                                                      # the four names
+ttplib.is_corrected("dsj1000_n999_uncorr_01")                         # True
+```
+
+Use `corrected=False` to compare with results published on the original files. The corrected files are stored in the
+`corrected/` folder of the Hugging Face dataset; the originals in `instances/` are unchanged.
+
+---
+
 ## For maintainers: uploading the dataset
 
 The `instances/` folder is **not** committed to this GitHub repo (it's in `.gitignore`).  
