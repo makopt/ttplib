@@ -14,7 +14,7 @@ use ttplib.load(name, corrected=False) for the original 2014 file.
 """
 
 from .instance import Item, TTPInstance
-from .remote import (BASE_URL, CORRECTED, CORRECTED_URL, clear_cache, is_corrected, list_bases, list_instances,
+from .remote import (BASE_URL, CATEGORIZED, CORRECTED, CORRECTED_URL, clear_cache, is_corrected, list_bases, list_instances,
                      load, load_file)
 
 __all__ = [
@@ -27,6 +27,7 @@ __all__ = [
     "clear_cache",
     "BASE_URL",
     "CORRECTED",
+    "CATEGORIZED",
     "CORRECTED_URL",
     "is_corrected",
 ]

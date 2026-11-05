@@ -57,6 +57,34 @@ def _load_minimal() -> ttplib.TTPInstance:
 # Catalog tests — no network required
 # ===========================================================================
 
+class TestCategorized(unittest.TestCase):
+    def test_sixty_names(self):
+        names = ttplib.list_instances(category="all")
+        self.assertEqual(len(names), 60)
+        self.assertEqual(len(set(names)), 60)
+
+    def test_twenty_per_category(self):
+        for c, suffix, mult in (("A", "_bounded-strongly-corr_01", 1), ("B", "_uncorr-similar-weights_05", 5),
+                                ("C", "_uncorr_10", 10)):
+            names = ttplib.list_instances(category=c)
+            self.assertEqual(len(names), 20)
+            for n in names:
+                self.assertTrue(n.endswith(suffix), n)
+
+    def test_category_is_case_insensitive_and_combines(self):
+        self.assertEqual(ttplib.list_instances(category="a"), ttplib.list_instances(category="A"))
+        self.assertEqual(ttplib.list_instances(category="A", base="dsj1000"), ["dsj1000_n999_bounded-strongly-corr_01"])
+
+    def test_bad_category(self):
+        with self.assertRaises(ValueError):
+            ttplib.list_instances(category="D")
+
+    def test_constant_matches_catalog(self):
+        cat = set(ttplib.list_instances())
+        for names in ttplib.CATEGORIZED.values():
+            self.assertTrue(set(names) <= cat)
+
+
 class TestListInstances(unittest.TestCase):
     def test_total_count(self):
         self.assertEqual(len(ttplib.list_instances()), 9720)

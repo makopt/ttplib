@@ -36,6 +36,78 @@ CORRECTED = (
     "dsj1000_n999_uncorr_01",
 )
 
+# The 60 categorized instances of El Yafrani and Ahiod (2016), used in most comparisons of TTP heuristics: twenty TSP
+# instances (eil76 to pla33810) and three categories. A: 1 item per city, bounded strongly correlated, capacity level 01.
+# B: 5 items per city, uncorrelated with similar weights, level 05. C: 10 items per city, uncorrelated, level 10.
+CATEGORIZED: Dict[str, tuple] = {
+    "A": (
+        "eil76_n75_bounded-strongly-corr_01",
+        "kroA100_n99_bounded-strongly-corr_01",
+        "ch130_n129_bounded-strongly-corr_01",
+        "u159_n158_bounded-strongly-corr_01",
+        "a280_n279_bounded-strongly-corr_01",
+        "u574_n573_bounded-strongly-corr_01",
+        "u724_n723_bounded-strongly-corr_01",
+        "dsj1000_n999_bounded-strongly-corr_01",
+        "rl1304_n1303_bounded-strongly-corr_01",
+        "fl1577_n1576_bounded-strongly-corr_01",
+        "d2103_n2102_bounded-strongly-corr_01",
+        "pcb3038_n3037_bounded-strongly-corr_01",
+        "fnl4461_n4460_bounded-strongly-corr_01",
+        "pla7397_n7396_bounded-strongly-corr_01",
+        "rl11849_n11848_bounded-strongly-corr_01",
+        "usa13509_n13508_bounded-strongly-corr_01",
+        "brd14051_n14050_bounded-strongly-corr_01",
+        "d15112_n15111_bounded-strongly-corr_01",
+        "d18512_n18511_bounded-strongly-corr_01",
+        "pla33810_n33809_bounded-strongly-corr_01",
+    ),
+    "B": (
+        "eil76_n375_uncorr-similar-weights_05",
+        "kroA100_n495_uncorr-similar-weights_05",
+        "ch130_n645_uncorr-similar-weights_05",
+        "u159_n790_uncorr-similar-weights_05",
+        "a280_n1395_uncorr-similar-weights_05",
+        "u574_n2865_uncorr-similar-weights_05",
+        "u724_n3615_uncorr-similar-weights_05",
+        "dsj1000_n4995_uncorr-similar-weights_05",
+        "rl1304_n6515_uncorr-similar-weights_05",
+        "fl1577_n7880_uncorr-similar-weights_05",
+        "d2103_n10510_uncorr-similar-weights_05",
+        "pcb3038_n15185_uncorr-similar-weights_05",
+        "fnl4461_n22300_uncorr-similar-weights_05",
+        "pla7397_n36980_uncorr-similar-weights_05",
+        "rl11849_n59240_uncorr-similar-weights_05",
+        "usa13509_n67540_uncorr-similar-weights_05",
+        "brd14051_n70250_uncorr-similar-weights_05",
+        "d15112_n75555_uncorr-similar-weights_05",
+        "d18512_n92555_uncorr-similar-weights_05",
+        "pla33810_n169045_uncorr-similar-weights_05",
+    ),
+    "C": (
+        "eil76_n750_uncorr_10",
+        "kroA100_n990_uncorr_10",
+        "ch130_n1290_uncorr_10",
+        "u159_n1580_uncorr_10",
+        "a280_n2790_uncorr_10",
+        "u574_n5730_uncorr_10",
+        "u724_n7230_uncorr_10",
+        "dsj1000_n9990_uncorr_10",
+        "rl1304_n13030_uncorr_10",
+        "fl1577_n15760_uncorr_10",
+        "d2103_n21020_uncorr_10",
+        "pcb3038_n30370_uncorr_10",
+        "fnl4461_n44600_uncorr_10",
+        "pla7397_n73960_uncorr_10",
+        "rl11849_n118480_uncorr_10",
+        "usa13509_n135080_uncorr_10",
+        "brd14051_n140500_uncorr_10",
+        "d15112_n151110_uncorr_10",
+        "d18512_n185110_uncorr_10",
+        "pla33810_n338090_uncorr_10",
+    ),
+}
+
 # In-memory session cache: name -> TTPInstance
 _mem_cache: Dict[str, TTPInstance] = {}
 
@@ -148,6 +220,7 @@ def list_instances(
     base: Optional[str] = None,
     item_type: Optional[str] = None,
     n_items: Optional[int] = None,
+    category: Optional[str] = None,
 ) -> List[str]:
     """Return the list of all available instance names.
 
@@ -160,6 +233,9 @@ def list_instances(
         ``"uncorr-similar-weights"``, or ``"bounded-strongly-corr"``.
     n_items:
         Filter by exact item count (the ``n<X>`` part of the name).
+    category:
+        Keep only the 60 categorized instances (see ``ttplib.CATEGORIZED``): ``"A"``, ``"B"`` or ``"C"`` for one
+        category (20 instances), or ``"all"`` for the 60.
 
     Returns
     -------
@@ -167,6 +243,15 @@ def list_instances(
     """
     names = _get_catalog()
 
+    if category is not None:
+        key = category.upper()
+        if key == "ALL":
+            keep = {n for c in CATEGORIZED.values() for n in c}
+        elif key in CATEGORIZED:
+            keep = set(CATEGORIZED[key])
+        else:
+            raise ValueError(f"category must be 'A', 'B', 'C' or 'all', not {category!r}")
+        names = [n for n in names if n in keep]
     if base is not None:
         names = [n for n in names if n.startswith(base + "_")]
     if item_type is not None:

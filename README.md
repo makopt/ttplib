@@ -200,6 +200,33 @@ Each base problem has instances for 4 item-count multipliers, 3 correlation type
 
 ---
 
+## The 60 categorized instances (version 0.2.1)
+
+Most comparisons of TTP heuristics use the 60 categorized instances of El Yafrani and Ahiod (2016): twenty TSP
+instances, from eil76 to pla33810, and three categories on each of them.
+
+| Category | Items per city | Type of knapsack | Capacity level |
+|---|---|---|---|
+| A | 1 | bounded strongly correlated | 01 |
+| B | 5 | uncorrelated, similar weights | 05 |
+| C | 10 | uncorrelated | 10 |
+
+```python
+import ttplib
+
+ttplib.list_instances(category="all")   # the 60 names
+ttplib.list_instances(category="A")     # the 20 instances of category A
+ttplib.CATEGORIZED                      # {"A": (...), "B": (...), "C": (...)}
+
+for name in ttplib.list_instances(category="all"):
+    inst = ttplib.load(name)
+```
+
+The instance of category A built on dsj1000 is one of the four instances with a renting rate of 0.00 (see below), so
+`ttplib.load` serves its corrected version by default.
+
+---
+
 ## Corrected instances (version 0.2.0)
 
 In the original files, the renting rate is written with two decimals. For four instances built on dsj1000 with 999
