@@ -85,6 +85,50 @@ class TestCategorized(unittest.TestCase):
             self.assertTrue(set(names) <= cat)
 
 
+class TestIterInstances(unittest.TestCase):
+    """Offline: ttplib.remote.load is replaced by a stub, so no network is used."""
+
+    def setUp(self):
+        import ttplib.remote as r
+        self.r = r
+        self.calls = []
+        self.orig = r.load
+
+        def fake_load(name, cache=True, corrected=True):
+            self.calls.append((name, cache, corrected))
+            key = name + ("#corrected" if corrected and name in r.CORRECTED else "")
+            inst = _load_minimal()
+            r._mem_cache[key] = inst
+            return inst
+
+        r.load = fake_load
+        r._mem_cache.clear()
+
+    def tearDown(self):
+        self.r.load = self.orig
+        self.r._mem_cache.clear()
+
+    def test_category_and_options(self):
+        out = list(ttplib.iter_instances(category="A", corrected=False, cache=False))
+        self.assertEqual([n for n, _ in out], ttplib.list_instances(category="A"))
+        self.assertTrue(all(c == (n, False, False) for c, n in zip(self.calls, [n for n, _ in out])))
+
+    def test_explicit_names(self):
+        names = list(ttplib.CORRECTED)
+        self.assertEqual([n for n, _ in ttplib.iter_instances(names)], names)
+
+    def test_memory_is_freed(self):
+        for _ in ttplib.iter_instances(base="eil76"):
+            pass
+        self.assertEqual(len(self.r._mem_cache), 0)
+
+    def test_default_is_all(self):
+        it = ttplib.iter_instances()
+        name, inst = next(it)
+        self.assertEqual(name, ttplib.list_instances()[0])
+        it.close()
+
+
 class TestListInstances(unittest.TestCase):
     def test_total_count(self):
         self.assertEqual(len(ttplib.list_instances()), 9720)

@@ -104,6 +104,34 @@ Each instance name follows the pattern:
 
 ---
 
+## Loading many instances
+
+```python
+import ttplib
+
+# all 9 720 instances, with the corrected version of the four instances with a renting rate of 0.00
+for name, inst in ttplib.iter_instances():
+    ...
+
+# all 9 720 original files
+for name, inst in ttplib.iter_instances(corrected=False):
+    ...
+
+# the 60 categorized instances, or any other filter of list_instances
+for name, inst in ttplib.iter_instances(category="all"):
+    ...
+
+# the four instances in both versions
+for name in ttplib.CORRECTED:
+    print(name, ttplib.load(name, corrected=False).renting_ratio, ttplib.load(name).renting_ratio)
+```
+
+The names are the same in both versions; only the files of the four instances of `ttplib.CORRECTED` differ.
+Loading all 9 720 instances downloads the whole dataset (about 17 GB); use `cache=False` to keep no copy on the
+computer.
+
+---
+
 ## Caching
 
 Downloaded instances are cached to `~/.cache/ttplib/` by default so subsequent loads are instant.
@@ -156,6 +184,7 @@ r.BASE_URL = "https://huggingface.co/datasets/myuser/ttplib-data/resolve/main/in
 | Function or constant | Returns | Description |
 |---|---|---|
 | `load(name, cache=True, corrected=True)` | `TTPInstance` | Loads the instance `name`. The file is downloaded from the dataset at its first use and a copy is kept on the computer (`cache=False`: no copy). For the four instances with a renting rate of 0.00, the corrected version is returned unless `corrected=False`. |
+| `iter_instances(names=None, corrected=True, cache=True, base=None, item_type=None, n_items=None, category=None)` | iterator of `(name, TTPInstance)` | Loads many instances one at a time: the given `names`, or those of `list_instances` with the same filters (all 9 720 with no argument). `corrected` and `cache` are as in `load`. Each instance is freed from memory when the next one is requested. |
 | `load_file(path)` | `TTPInstance` | Loads an instance from a JSON file on the computer. |
 | `list_instances(base=None, item_type=None, n_items=None, category=None)` | `list[str]` | Names of the instances, all 9 720 by default. Filters: `base` (TSP instance, e.g. `"dsj1000"`), `item_type` (`"bounded-strongly-corr"`, `"uncorr-similar-weights"` or `"uncorr"`), `n_items` (number of items, e.g. `999`), `category` (`"A"`, `"B"`, `"C"` or `"all"` for the 60 categorized instances). Filters can be combined. |
 | `list_bases()` | `list[str]` | Names of the 81 TSP instances. |
@@ -326,6 +355,7 @@ The original instances in text format are available at:
 
 ## Changes
 
+- **0.2.2**: `iter_instances` loads many instances one at a time, with or without the corrected versions.
 - **0.2.1**: distances computed on demand (pla85900 loads in a few seconds with less than 200 MB); the complete graph
   `graph` is built only when it is used; the 60 categorized instances (`CATEGORIZED`, `list_instances(category=...)`).
 - **0.2.0**: corrected versions of the four instances with a renting rate of 0.00, served by default (`corrected`,

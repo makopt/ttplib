@@ -7,7 +7,7 @@ import os
 import re
 import urllib.request
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Dict, Iterator, List, Optional, Tuple
 
 from .instance import TTPInstance
 
@@ -207,6 +207,46 @@ def load(name: str, cache: bool = True, corrected: bool = True) -> TTPInstance:
     inst = TTPInstance.from_dict(data)
     _mem_cache[key] = inst
     return inst
+
+
+def iter_instances(
+    names: Optional[List[str]] = None,
+    corrected: bool = True,
+    cache: bool = True,
+    base: Optional[str] = None,
+    item_type: Optional[str] = None,
+    n_items: Optional[int] = None,
+    category: Optional[str] = None,
+) -> Iterator[Tuple[str, TTPInstance]]:
+    """Yield ``(name, instance)`` for many instances, one at a time.
+
+    Parameters
+    ----------
+    names:
+        Instance names to load. If None, the names are those of
+        ``list_instances(base, item_type, n_items, category)``, so that with
+        no argument all 9,720 instances are loaded.
+    corrected:
+        As in ``load``: True (default) gives the corrected version of the
+        four instances of ``ttplib.CORRECTED``, False gives the original files.
+    cache:
+        As in ``load``: keep a copy of each downloaded file on the computer.
+
+    Each instance is removed from the memory of the session once the next one
+    is requested (unless it was already loaded before), so that iterating over
+    the whole benchmark does not fill the memory.
+    """
+    if names is None:
+        names = list_instances(base=base, item_type=item_type, n_items=n_items, category=category)
+    for name in names:
+        key = name + ("#corrected" if corrected and name in CORRECTED else "")
+        was_loaded = key in _mem_cache
+        inst = load(name, cache=cache, corrected=corrected)
+        try:
+            yield name, inst
+        finally:
+            if not was_loaded:
+                _mem_cache.pop(key, None)
 
 
 def load_file(path) -> TTPInstance:
